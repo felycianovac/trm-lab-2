@@ -483,7 +483,7 @@ M.door.addEventListener("markerFound",()=>{
     return;
   }
 
-  gameOver("You reached the door without the means to open it…");
+hint("The door is sealed… something is missing.");
 });
 M.door.addEventListener("markerLost",()=>E.door.setAttribute("visible",false));
 
