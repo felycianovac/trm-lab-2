@@ -66,7 +66,7 @@
   </div>
 </div>
 <input type="range" id="radioSlider" min="80" max="120" value="90"
-       style="position:fixed; bottom:150px; left:50%;" >
+       style="display:nonw; position:fixed; bottom:150px; left:50%;" >
 
 <div id="gameOverScreen"
      style="display:none; position:fixed; top:0; left:0;
@@ -74,7 +74,7 @@
             background:black; color:white;
             font-family:sans-serif;
             font-size:32px; font-weight:bold;
-            display:flex; flex-direction:column;
+            flex-direction:column;
             align-items:center; justify-content:center;
             z-index:100000;">
   GAME OVER
@@ -483,7 +483,7 @@ M.door.addEventListener("markerFound",()=>{
     return;
   }
 
-hint("The door is sealed… something is missing.");
+  hint("The door is sealed… something is missing.");
 });
 M.door.addEventListener("markerLost",()=>E.door.setAttribute("visible",false));
 
