@@ -1,0 +1,8 @@
+Model Information:
+* title:	Vent
+* source:	https://sketchfab.com/3d-models/vent-4c5ce1b8dda340e2b8b904c47c48d28c
+* author:	thecrazy_craft (https://sketchfab.com/thecrazy_craft)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works
