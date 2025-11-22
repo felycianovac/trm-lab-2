@@ -195,7 +195,9 @@
   <!-- FLASHLIGHT -->
   <a-nft id="m_flashlight" type="nft" url="markers/flashlight">
     <a-entity id="flashlight" gltf-model="models/flashlight/scene.gltf"
-      scale="0.3 0.3 0.3" visible="false"></a-entity>
+    position="0 0 0"
+    rotation="0 0 0"
+    scale="1 1 1" visible="false"></a-entity>
   </a-nft>
 
   <!-- FUSE BOX -->
@@ -392,7 +394,7 @@ M.flash.addEventListener("markerFound",()=>{
   E.flash.setAttribute("visible",true);
   if(state==="start"){
     state="flashlight";
-    hint("Your flashlight blinks awake… something hums nearby.");
+    hint("Your flashlight flickers on. You hear a faint electrical hum nearby.");
   }
 });
 M.flash.addEventListener("markerLost",()=>E.flash.setAttribute("visible",false));
