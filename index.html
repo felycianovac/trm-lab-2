@@ -278,6 +278,18 @@ function clearButtons(){
   document.getElementById("uiButtons").innerHTML = "";
 }
 
+
+function checkModel(entity, name) {
+  const model = entity.getObject3D('mesh');
+  if (model) {
+    const box = new THREE.Box3().setFromObject(model);
+    const size = box.getSize(new THREE.Vector3());
+    debug(`${name} loaded! Size: ${size.x.toFixed(2)} x ${size.y.toFixed(2)} x ${size.z.toFixed(2)}`);
+  } else {
+    debug(`${name} - NO MESH FOUND`);
+  }
+}
+
 /* -----------------------------
    TIMER
 ------------------------------ */
@@ -407,6 +419,27 @@ function openCodeUI() {
   };
 
 }
+
+E.flash.addEventListener('model-loaded', () => {
+  debug("Flashlight model LOADED");
+  checkModel(E.flash, "Flashlight");
+});
+
+E.locker.addEventListener('model-loaded', () => {
+  debug("Locker model LOADED");
+  checkModel(E.locker, "Locker");
+});
+
+E.note.addEventListener('model-loaded', () => {
+  debug("Notebook model LOADED");
+  checkModel(E.note, "Notebook");
+});
+
+E.fuse.addEventListener('model-loaded', () => {
+  debug("Fusebox model LOADED");
+  checkModel(E.fuse, "Fusebox");
+});
+
 
 
 /* -----------------------------
