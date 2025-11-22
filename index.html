@@ -2,87 +2,97 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>The Basement Inventory — AR Escape</title>
+  <title>Basement Escape — AR Experience</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 
-  <!-- A-Frame (latest stable) -->
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-
-  <!-- AR.js NFT build (REQUIRED for NFT markers) -->
   <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
 
   <style>
     body { margin:0; overflow:hidden; background:black; }
     #hintBox {
       position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
-      background:rgba(0,0,0,0.75); color:#eee; padding:10px 15px;
+      background:rgba(0,0,0,0.75); color:#fff; padding:10px 15px;
       border-radius:10px; max-width:320px; text-align:center;
-      font-family:system-ui; font-size:14px; z-index:9999;
-      transition: opacity 0.6s ease;
+      font-family:sans-serif; font-size:14px; z-index:9999;
     }
     #debugMobile {
       position:fixed; top:10px; left:10px;
-      background:rgba(0,0,0,0.6); color:white;
-      padding:8px; font-size:14px; z-index:99999;
+      background:rgba(0,0,0,0.6); color:#fff;
+      padding:6px 10px; font-size:14px; z-index:99999;
+    }
+    #uiButtons {
+      position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+      display:flex; flex-direction:column; gap:8px;
+      z-index:99999;
+    }
+    #uiButtons button {
+      padding:10px 14px;
+      font-size:14px; border:0; border-radius:8px;
+      background:rgba(255,255,255,0.85);
+      cursor:pointer;
+    }
+    #timerBox {
+      position:fixed; top:10px; right:10px;
+      background:red; padding:8px 12px; color:white;
+      font-size:18px; font-weight:bold; border-radius:6px;
+      display:none; z-index:9999;
     }
   </style>
 </head>
 
 <body>
-<div id="debugMobile">DEBUG: none</div>
-<div id="hintBox">The basement waits. Seek the Flashlight marker.</div>
 
-<a-scene
-  vr-mode-ui="enabled: false"
-  embedded
-  arjs="trackingMethod: best;"
->
-  <a-entity light="type: ambient; intensity: 0.8"></a-entity>
+<div id="debugMobile">DEBUG: none</div>
+<div id="hintBox">The basement waits… Scan the Flashlight.</div>
+<div id="timerBox">5</div>
+
+<div id="uiButtons"></div>
+
+<a-scene embedded arjs="trackingMethod: best;">
+  <a-entity light="type: ambient; intensity: 0.7"></a-entity>
   <a-entity light="type: directional; intensity: 0.6" position="0 1 1"></a-entity>
 
-  <!-- FLASHLIGHT MARKER -->
-  <a-nft
-    id="m_flashlight"
-    type="nft"
-    url="markers/flashlight">
-      <a-entity id="flashlight" gltf-model="models/flashlight/scene.gltf"
-        scale="0.3 0.3 0.3" visible="false">
-      </a-entity>
+  <!-- FLASHLIGHT -->
+  <a-nft id="m_flashlight" type="nft" url="markers/flashlight">
+    <a-entity id="flashlight" gltf-model="models/flashlight/scene.gltf"
+      scale="0.3 0.3 0.3" visible="false"></a-entity>
   </a-nft>
 
   <!-- FUSE BOX -->
   <a-nft id="m_fusebox" type="nft" url="markers/fuse_box">
     <a-entity id="fusebox" gltf-model="models/fusebox/scene.gltf"
-      scale="0.35 0.35 0.35" visible="false">
-    </a-entity>
+      scale="0.35 0.35 0.35" visible="false"></a-entity>
   </a-nft>
 
   <!-- NOTEBOOK -->
   <a-nft id="m_notebook" type="nft" url="markers/notebook">
     <a-entity id="notebook" gltf-model="models/notebook/scene.gltf"
-      scale="0.35 0.35 0.35" visible="false">
-    </a-entity>
+      scale="0.35 0.35 0.35" visible="false"></a-entity>
   </a-nft>
 
   <!-- LOCKER -->
   <a-nft id="m_locker" type="nft" url="markers/locker">
     <a-entity id="locker" gltf-model="models/rusty_locker/scene.gltf"
-      scale="0.5 0.5 0.5" visible="false">
-    </a-entity>
+      scale="0.45 0.45 0.45" visible="false"></a-entity>
   </a-nft>
 
   <!-- VENT -->
   <a-nft id="m_vent" type="nft" url="markers/vent">
     <a-entity id="vent" gltf-model="models/vent/scene.gltf"
-      scale="0.45 0.45 0.45" visible="false">
-    </a-entity>
+      scale="0.40 0.40 0.40" visible="false"></a-entity>
   </a-nft>
 
   <!-- DOOR -->
   <a-nft id="m_door" type="nft" url="markers/door">
     <a-entity id="door" gltf-model="models/door/scene.gltf"
-      scale="1 1 1" visible="false">
-    </a-entity>
+      scale="1 1 1" visible="false"></a-entity>
+  </a-nft>
+
+  <!-- RADIO (secret branch) -->
+  <a-nft id="m_radio" type="nft" url="markers/radio">
+    <a-entity id="radio" gltf-model="models/radio/scene.gltf"
+      scale="0.4 0.4 0.4" visible="false"></a-entity>
   </a-nft>
 
   <a-entity camera></a-entity>
@@ -90,162 +100,273 @@
 
 <script>
 /* -----------------------------
-   GAME STATE
+   STATE
 ------------------------------ */
 
 let state = "start";
-let fuseSolved = false;
-let notebookRead = false;
-let lockerOpened = false;
-let ventOpened = false;
+let fuseOn = false;
+let notebookChoice = null;   // "locker" or "radio"
+let keyFound = false;
+let ventOpen = false;
+let radioTuned = false;
+
+let timer = 0;
+let timerInterval = null;
+
+/* -----------------------------
+   HELPERS
+------------------------------ */
 
 function debug(msg){
   document.getElementById("debugMobile").innerText = "DEBUG: " + msg;
 }
-
 function hint(msg){
-  const box = document.getElementById("hintBox");
-  box.innerText = msg;
-  box.style.opacity = 1;
+  document.getElementById("hintBox").innerText = msg;
+}
+function showButtons(...btns){
+  const box = document.getElementById("uiButtons");
+  box.innerHTML = "";
+  btns.forEach(b => box.appendChild(b));
+}
+function clearButtons(){
+  document.getElementById("uiButtons").innerHTML = "";
 }
 
 /* -----------------------------
-   MARKER REFERENCES
+   TIMER
 ------------------------------ */
+function startTimer(seconds, onEnd){
+  const box = document.getElementById("timerBox");
+  timer = seconds;
+  box.style.display = "block";
+  box.innerText = timer;
+
+  timerInterval = setInterval(()=>{
+    timer--;
+    box.innerText = timer;
+    if(timer <= 0){
+      clearInterval(timerInterval);
+      box.style.display = "none";
+      onEnd();
+    }
+  },1000);
+}
+
+/* -----------------------------
+   MARKERS
+------------------------------ */
+
 const M = {
-  flash: document.querySelector("#m_flashlight"),
-  fuse: document.querySelector("#m_fusebox"),
-  note: document.querySelector("#m_notebook"),
-  locker: document.querySelector("#m_locker"),
-  vent: document.querySelector("#m_vent"),
-  door: document.querySelector("#m_door")
+  flash: m_flashlight,
+  fuse: m_fusebox,
+  note: m_notebook,
+  locker: m_locker,
+  vent: m_vent,
+  door: m_door,
+  radio: m_radio
 };
 
-const Models = {
-  flash: document.querySelector("#flashlight"),
-  fuse: document.querySelector("#fusebox"),
-  note: document.querySelector("#notebook"),
-  locker: document.querySelector("#locker"),
-  vent: document.querySelector("#vent"),
-  door: document.querySelector("#door"),
+const E = {
+  flash: flashlight,
+  fuse: fusebox,
+  note: notebook,
+  locker: locker,
+  vent: vent,
+  door: door,
+  radio: radio
 };
 
 /* -----------------------------
    FLASHLIGHT
 ------------------------------ */
-M.flash.addEventListener("markerFound", () => {
-  debug("FLASHLIGHT FOUND");
-  Models.flash.setAttribute("visible", true);
-
-  if(state === "start"){
-    state = "flashlight";
-    hint("You found the flashlight… Now look for the Fuse Box marker.");
+M.flash.addEventListener("markerFound",()=>{
+  E.flash.setAttribute("visible",true);
+  if(state==="start"){
+    state="flashlight";
+    hint("The beam flickers alive… Find the Fuse Box.");
   }
 });
-M.flash.addEventListener("markerLost", () => Models.flash.setAttribute("visible", false));
+M.flash.addEventListener("markerLost",()=>E.flash.setAttribute("visible",false));
 
 /* -----------------------------
    FUSE BOX
 ------------------------------ */
-M.fuse.addEventListener("markerFound", () => {
-  Models.fuse.setAttribute("visible", true);
+M.fuse.addEventListener("markerFound",()=>{
+  E.fuse.setAttribute("visible",true);
 
-  if(state !== "flashlight"){
-    hint("The power is dead… You must find the Flashlight first.");
+  if(state!=="flashlight"){
+    hint("Too dark. Restore light first.");
     return;
   }
 
-  if(!fuseSolved){
-    fuseSolved = true;
-    state = "fuse";
-    hint("Power hums back. Seek the Notebook marker.");
+  if(!fuseOn){
+    fuseOn=true;
+    hint("Power surges back. Find the Notebook.");
+    state="fuse";
   }
 });
-M.fuse.addEventListener("markerLost", () => Models.fuse.setAttribute("visible", false));
+M.fuse.addEventListener("markerLost",()=>E.fuse.setAttribute("visible",false));
 
 /* -----------------------------
    NOTEBOOK
 ------------------------------ */
-M.note.addEventListener("markerFound", () => {
-  Models.note.setAttribute("visible", true);
+M.note.addEventListener("markerFound",()=>{
+  E.note.setAttribute("visible",true);
 
-  if(!fuseSolved){
-    hint("The notebook is unreadable in the dark… Fix the Fuse Box first.");
+  if(!fuseOn){
+    hint("Unreadable in the dark.");
     return;
   }
 
-  if(!notebookRead){
-    notebookRead = true;
-    state = "note";
-    hint("The notebook reveals a code… Check the Locker marker.");
+  if(state==="fuse"){
+    hint("Two clues appear… choose your path.");
+    
+    // UI CHOICES
+    const b1 = document.createElement("button");
+    b1.innerText = "Follow Code → Locker";
+    b1.onclick = ()=>{
+      notebookChoice="locker";
+      clearButtons();
+      hint("Then find the Locker.");
+    };
+
+    const b2 = document.createElement("button");
+    b2.innerText = "Follow Signal → Radio";
+    b2.onclick = ()=>{
+      notebookChoice="radio";
+      clearButtons();
+      hint("Seek the old Radio marker.");
+    };
+
+    showButtons(b1,b2);
+    state="note";
   }
 });
-M.note.addEventListener("markerLost", () => Models.note.setAttribute("visible", false));
+M.note.addEventListener("markerLost",()=>E.note.setAttribute("visible",false));
 
 /* -----------------------------
    LOCKER
 ------------------------------ */
-M.locker.addEventListener("markerFound", () => {
-  Models.locker.setAttribute("visible", true);
+M.locker.addEventListener("markerFound",()=>{
+  E.locker.setAttribute("visible",true);
 
-  if(!notebookRead){
-    hint("A lock blocks your way… The Notebook holds the clue.");
+  if(notebookChoice!=="locker"){
+    hint("The lock resists. Something else guides you.");
     return;
   }
 
-  if(!lockerOpened){
-    lockerOpened = true;
-    state = "locker";
-    hint("You found a cold metal key. Try the Exit Door marker.");
+  if(!keyFound){
+    hint("Enter the code before time runs out!");
+
+    const btn = document.createElement("button");
+    btn.innerText="Enter Code";
+    btn.onclick=()=>{
+      keyFound=true;
+      clearButtons();
+      hint("Key found. The Door may open.");
+    };
+
+    showButtons(btn);
+
+    // TIME LIMIT
+    startTimer(5,()=>{
+      clearButtons();
+      hint("You failed. The locker jams permanently.");
+    });
   }
 });
-M.locker.addEventListener("markerLost", () => Models.locker.setAttribute("visible", false));
+M.locker.addEventListener("markerLost",()=>E.locker.setAttribute("visible",false));
 
 /* -----------------------------
    VENT
 ------------------------------ */
-M.vent.addEventListener("markerFound", () => {
-  Models.vent.setAttribute("visible", true);
+M.vent.addEventListener("markerFound",()=>{
+  E.vent.setAttribute("visible",true);
 
-  if(!lockerOpened){
-    hint("The vent won’t budge… Something else must be unlocked first.");
+  if(!keyFound){
+    hint("Screws are tight… Something else might remove them.");
     return;
   }
 
-  if(!ventOpened){
-    ventOpened = true;
-    state = "vent";
-    hint("A hidden escape route opens… Perhaps the Door is not needed.");
+  if(!ventOpen){
+    ventOpen=true;
+    hint("Vent loosens… You can escape if the Door fails.");
   }
 });
-M.vent.addEventListener("markerLost", () => Models.vent.setAttribute("visible", false));
+M.vent.addEventListener("markerLost",()=>E.vent.setAttribute("visible",false));
 
 /* -----------------------------
-   DOOR
+   RADIO (Secret Ending)
 ------------------------------ */
-M.door.addEventListener("markerFound", () => {
-  Models.door.setAttribute("visible", true);
+let frequency = 90;
+M.radio.addEventListener("markerFound",()=>{
+  E.radio.setAttribute("visible",true);
 
-  if(!fuseSolved){
-    hint("The door refuses to power on… Restore electricity first.");
+  if(notebookChoice!=="radio"){
+    hint("Static. Wrong path.");
     return;
   }
 
-  if(lockerOpened){
-    state = "escaped";
-    hint("The key turns… The door unlocks. You escape the basement.");
-    return;
-  }
+  hint("Tune the radio…");
 
-  if(ventOpened){
-    state = "escaped";
-    hint("The door stays sealed… but the vent is your freedom.");
-    return;
-  }
+  const btn = document.createElement("button");
+  btn.innerText="Tune (+5 MHz)";
+  btn.onclick=()=>{
+    frequency += 5;
 
-  hint("The door is locked tight… Something crucial is still missing.");
+    if(frequency >= 105){
+      radioTuned=true;
+      hint("A voice whispers: 'The exit awaits…'");
+      clearButtons();
+    } else {
+      hint("Frequency: "+frequency+" MHz");
+    }
+  };
+
+  showButtons(btn);
 });
-M.door.addEventListener("markerLost", () => Models.door.setAttribute("visible", false));
+M.radio.addEventListener("markerLost",()=>E.radio.setAttribute("visible",false));
+
+/* -----------------------------
+   DOOR — Multiple Endings
+------------------------------ */
+M.door.addEventListener("markerFound",()=>{
+  E.door.setAttribute("visible",true);
+
+  if(!fuseOn){
+    hint("No power. Door won't respond.");
+    return;
+  }
+
+  // SECRET ENDING
+  if(radioTuned){
+    hint("The door opens on its own. You escaped the strange signal.");
+    clearButtons();
+    return;
+  }
+
+  // NORMAL ENDING
+  if(keyFound){
+    const btn = document.createElement("button");
+    btn.innerText="Use Key";
+    btn.onclick=()=>{
+      hint("The lock clicks. You escaped the basement.");
+      clearButtons();
+    };
+    showButtons(btn);
+    return;
+  }
+
+  // VENT ENDING
+  if(ventOpen){
+    hint("Door stuck. But the vent is open — escape through it.");
+    clearButtons();
+    return;
+  }
+
+  hint("The door is locked tight.");
+});
+M.door.addEventListener("markerLost",()=>E.door.setAttribute("visible",false));
 
 </script>
 </body>
