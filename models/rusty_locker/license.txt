@@ -1,11 +1,8 @@
 Model Information:
-* title:	Rusty Locker
-* source:	https://sketchfab.com/3d-models/rusty-locker-d9cc270d4a564fcf8fda0b7e7f16bfbb
-* author:	D3rpmaster (https://sketchfab.com/D3rpmaster)
+* title:	Locker
+* source:	https://sketchfab.com/3d-models/locker-98530742215646d6b634c587c400bdf5
+* author:	GonnabeOkay (https://sketchfab.com/GonnabeOkay)
 
 Model License:
-* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
-* requirements:	Author must be credited. Commercial use is allowed.
-
-If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
-This work is based on "Rusty Locker" (https://sketchfab.com/3d-models/rusty-locker-d9cc270d4a564fcf8fda0b7e7f16bfbb) by D3rpmaster (https://sketchfab.com/D3rpmaster) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works
