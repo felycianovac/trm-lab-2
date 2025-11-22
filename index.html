@@ -277,9 +277,6 @@ M.fuse.addEventListener("markerLost",()=>E.fuse.setAttribute("visible",false));
 /* -----------------------------
    NOTEBOOK (with code unlock)
 ------------------------------ */
-/* -----------------------------
-   NOTEBOOK (with code unlock)
------------------------------- */
 M.note.addEventListener("markerFound", () => {
   E.note.setAttribute("visible", true);
 
@@ -289,13 +286,35 @@ M.note.addEventListener("markerFound", () => {
   }
 
   if (!notebookRead) {
-    notebookRead = true;
-    state = "note";
+  notebookRead = true;
+  state = "note";
 
-    hint("A code is scribbled on a torn page. Press ENTER CODE on screen.");
+  hint("A torn page reveals two clues. Pick a path:");
 
+  clearButtons();
+
+  // Button 1: Locker branch
+  const b1 = document.createElement("button");
+  b1.innerText = "Follow the Locker Clue";
+  b1.onclick = () => {
+    notebookChoice = "locker";
+    hint("You chose the Locker path. Press ENTER CODE.");
+    clearButtons();
     showCodeButton();
-  }
+  };
+
+  // Button 2: Radio branch
+  const b2 = document.createElement("button");
+  b2.innerText = "Follow the Radio Signal";
+  b2.onclick = () => {
+    notebookChoice = "radio";
+    hint("You chose the Radio path. Scan the Radio.");
+    clearButtons();
+  };
+
+  showButtons(b1, b2);
+}
+
 });
 
 M.note.addEventListener("markerLost", () => {
