@@ -65,8 +65,18 @@
     10s remaining
   </div>
 </div>
-<input type="range" id="radioSlider" min="80" max="120" value="90"
-       style="display:nonw; position:fixed; bottom:150px; left:50%;" >
+<input type="range" id="radioSlider"
+       min="80" max="120" value="90"
+       style="
+         display:none;
+         position:fixed;
+         bottom:150px;
+         left:50%;
+         transform:translateX(-50%);
+         width:250px;
+         height:30px;
+         z-index:999999;
+       ">
 
 <div id="gameOverScreen"
      style="display:none; position:fixed; top:0; left:0;
