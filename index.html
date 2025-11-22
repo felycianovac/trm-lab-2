@@ -93,6 +93,20 @@
   </div>
 </div>
 
+<div id="winScreen"
+     style="display:none; position:fixed; top:0; left:0;
+            width:100vw; height:100vh;
+            background:black; color:white;
+            font-family:sans-serif;
+            font-size:32px; font-weight:bold;
+            flex-direction:column;
+            align-items:center; justify-content:center;
+            z-index:100000;">
+  YOU ESCAPED
+  <div style="font-size:16px; margin-top:10px; opacity:0.7;">
+    You found your way out.<br>Refresh to play again
+
+
 
 
 
@@ -211,6 +225,15 @@ function gameOver(reason="") {
     document.getElementById("gameOverScreen").style.display = "flex";
   }, 1200);
 }
+
+function win(message="You escaped.") {
+  clearButtons();
+  hint(message);
+  setTimeout(() => {
+    document.getElementById("winScreen").style.display = "flex";
+  }, 1200);
+}
+
 
 
 /* -----------------------------
@@ -470,9 +493,9 @@ M.door.addEventListener("markerFound",()=>{
 
   // RADIO END
   if(radioTuned){
-    hint("The door unlocks on its own… as if summoned. You escaped the room.");
-    clearButtons();
+    win("The door unlocks on its own… the signal guided you out.");
     return;
+
   }
 
   // LOCKER END
@@ -480,8 +503,7 @@ M.door.addEventListener("markerFound",()=>{
     const b = document.createElement("button");
     b.innerText = "Use Key";
     b.onclick = () => {
-      hint("The lock snaps open… freedom. You escaped the room.");
-      clearButtons();
+      win("The lock snaps open… you slip into freedom.");
     };
     showButtons(b);
     return;
@@ -489,11 +511,13 @@ M.door.addEventListener("markerFound",()=>{
 
   // VENT END
   if(ventOpen){
-    hint("Door jammed… but the open vent awaits.");
+    win("You crawl through the open vent and escape.");
     return;
+
+
   }
 
-  hint("The door is sealed… something is missing.");
+  gameOver("You reached the door without the means to open it…");
 });
 M.door.addEventListener("markerLost",()=>E.door.setAttribute("visible",false));
 
