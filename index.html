@@ -293,6 +293,14 @@ function startTimer(seconds, onEnd){
   },1000);
 }
 
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
+
 function gameOver(reason="") {
   clearButtons();
   hint(reason);
@@ -361,7 +369,7 @@ function openCodeUI() {
 
     if (timeLeft <= 0) {
       clearInterval(codeTimerInterval);
-      msg.innerText = "Time’s up! Re-scan Notebook to retry.";
+      gameOver("You hesitated too long… the lock mechanism jammed forever.");
       setTimeout(() => ui.style.display = "none", 1500);
     }
   }, 1000);
@@ -485,11 +493,6 @@ M.locker.addEventListener("markerFound", () => {
     };
 
     showButtons(b);
-
-     startTimer(10, () => {
-      clearButtons();
-      gameOver("You hesitated too long… the lock mechanism jammed forever.");
-    });
   }
 });
 M.locker.addEventListener("markerLost",()=>E.locker.setAttribute("visible",false));
