@@ -123,7 +123,7 @@
 
 let state = "start";
 let fuseOn = false;
-let notebookChoice = null;   // "locker" or "radio"
+let notebookChoice = null;   
 let keyFound = false;
 let ventOpen = false;
 let radioTuned = false;
@@ -231,17 +231,17 @@ function openCodeUI() {
   }, 1000);
 
   document.getElementById("codeSubmit").onclick = () => {
-  if (input.value === lockerCode) {
-    clearInterval(codeTimerInterval);
-    ui.style.display = "none";
-    
-    keyFound = true;
-    hint("A cold metal key falls to the floor…");
+    if (input.value === lockerCode) {
+      clearInterval(codeTimerInterval);
+      ui.style.display = "none";
 
-  } else {
-    msg.innerText = "The lock rattles… wrong code.";
-  }
-};
+      keyFound = true;
+      hint("A cold metal key falls to the floor…");
+
+    } else {
+      msg.innerText = "The lock rattles… wrong code.";
+    }
+  };
 
 }
 
@@ -253,7 +253,7 @@ M.flash.addEventListener("markerFound",()=>{
   E.flash.setAttribute("visible",true);
   if(state==="start"){
     state="flashlight";
-    hint("The beam flickers alive… Find the Fuse Box.");
+    hint("Your flashlight blinks awake… something hums nearby.");
   }
 });
 M.flash.addEventListener("markerLost",()=>E.flash.setAttribute("visible",false));
@@ -265,13 +265,13 @@ M.fuse.addEventListener("markerFound",()=>{
   E.fuse.setAttribute("visible",true);
 
   if(state!=="flashlight"){
-    hint("Too dark. Restore light first.");
+    hint("You grope in darkness… the fusebox feels cold.");
     return;
   }
 
   if(!fuseOn){
     fuseOn=true;
-    hint("Power surges back. Find the Notebook.");
+    hint("A soft hum fills the basement… pages may now be readable.");
     state="fuse";
   }
 });
@@ -284,7 +284,7 @@ M.note.addEventListener("markerFound", () => {
   E.note.setAttribute("visible", true);
 
   if (!fuseOn) {
-    hint("Ink stains… unreadable without power.");
+    hint("The ink runs in the dark… you see nothing.");
     return;
   }
 
@@ -295,13 +295,30 @@ M.note.addEventListener("markerFound", () => {
     // More subtle clue
     hint("A scribbled line reads: 'Four shadows… 4 7 2 9'. Perhaps it opens something metal.");
 
-    // No buttons here. No choices.
+   clearButtons();
+
+    // Locker path
+    const btn1 = document.createElement("button");
+    btn1.innerText = "Follow the Numbers";
+    btn1.onclick = () => {
+      notebookChoice = "locker";
+      hint("The numbers echo faintly… a metal lock awaits.");
+      clearButtons();
+    };
+
+    // Radio path
+    const btn2 = document.createElement("button");
+    btn2.innerText = "Follow the Signal";
+    btn2.onclick = () => {
+      notebookChoice = "radio";
+      hint("A hidden broadcast calls to you…");
+      clearButtons();
+    };
+
+    showButtons(btn1, btn2);
   }
 });
-
-M.note.addEventListener("markerLost", () => {
-  E.note.setAttribute("visible", false);
-});
+M.note.addEventListener("markerLost",()=>E.note.setAttribute("visible",false));
 
 
 
@@ -312,84 +329,85 @@ M.note.addEventListener("markerLost", () => {
 M.locker.addEventListener("markerFound", () => {
   E.locker.setAttribute("visible", true);
 
-  if (state !== "notebook_done") {
-    hint("A rusty lock… no idea how to open it.");
+  if(notebookChoice === null){
+    hint("A rusted door… no ideas come to mind.");
+    return;
+  }
+  if(notebookChoice === "radio"){
+    hint("The locker feels sealed shut… the signal forbids it.");
     return;
   }
 
-  if (!keyFound) {
-    hint("The numbers from the notebook echo in your mind… enter them.");
+  if(!keyFound){
+    hint("The digits from the notebook pulse in your thoughts…");
 
-    const btn = document.createElement("button");
-    btn.innerText = "Enter Code";
-    btn.onclick = () => {
+    const b = document.createElement("button");
+    b.innerText = "Enter Code";
+    b.onclick = () => {
       clearButtons();
-      openCodeUI();   // immediately open the code input
+      openCodeUI();
     };
 
-    showButtons(btn);
-
-    // Optional timer (you can remove if needed)
-    startTimer(10, () => {
-      clearButtons();
-      hint("The locker growls shut again.");
-    });
+    showButtons(b);
   }
 });
+M.locker.addEventListener("markerLost",()=>E.locker.setAttribute("visible",false));
 
-M.locker.addEventListener("markerLost", () => {
-  E.locker.setAttribute("visible", false);
-});
 
 /* -----------------------------
-   VENT
+   RADIO — only if chosen path
+------------------------------ */
+let freq = 90;
+
+M.radio.addEventListener("markerFound",()=>{
+  E.radio.setAttribute("visible",true);
+
+  if(notebookChoice === null){
+    hint("Only static answers.");
+    return;
+  }
+
+  if(notebookChoice === "locker"){
+    hint("The broadcast rejects you… wrong path.");
+    return;
+  }
+
+  // Radio path
+  hint("The radio crackles… tune it.");
+
+  const b = document.createElement("button");
+  b.innerText = "Tune +5 MHz";
+  b.onclick = () => {
+    freq += 5;
+    if(freq >= 105){
+      radioTuned = true;
+      hint("The static clears: 'The exit… is open.'");
+      clearButtons();
+    } else {
+      hint("Frequency: "+freq+" MHz");
+    }
+  };
+
+  showButtons(b);
+});
+M.radio.addEventListener("markerLost",()=>E.radio.setAttribute("visible",false));
+
+/* -----------------------------
+   VENT (backup escape)
 ------------------------------ */
 M.vent.addEventListener("markerFound",()=>{
   E.vent.setAttribute("visible",true);
 
-  if(!keyFound){
-    hint("Screws are tight… Something else might remove them.");
-    return;
-  }
-
-  if(!ventOpen){
-    ventOpen=true;
-    hint("Vent loosens… You can escape if the Door fails.");
+  if(keyFound || radioTuned){
+    if(!ventOpen){
+      ventOpen = true;
+      hint("The screws fall out… the vent is open.");
+    }
+  } else {
+    hint("The vent is secured… not yet.");
   }
 });
 M.vent.addEventListener("markerLost",()=>E.vent.setAttribute("visible",false));
-
-/* -----------------------------
-   RADIO (Secret Ending)
------------------------------- */
-let frequency = 90;
-M.radio.addEventListener("markerFound",()=>{
-  E.radio.setAttribute("visible",true);
-
-  if(notebookChoice!=="radio"){
-    hint("Static. Wrong path.");
-    return;
-  }
-
-  hint("Tune the radio…");
-
-  const btn = document.createElement("button");
-  btn.innerText="Tune (+5 MHz)";
-  btn.onclick=()=>{
-    frequency += 5;
-
-    if(frequency >= 105){
-      radioTuned=true;
-      hint("A voice whispers: 'The exit awaits…'");
-      clearButtons();
-    } else {
-      hint("Frequency: "+frequency+" MHz");
-    }
-  };
-
-  showButtons(btn);
-});
-M.radio.addEventListener("markerLost",()=>E.radio.setAttribute("visible",false));
 
 /* -----------------------------
    DOOR — Multiple Endings
@@ -398,37 +416,36 @@ M.door.addEventListener("markerFound",()=>{
   E.door.setAttribute("visible",true);
 
   if(!fuseOn){
-    hint("No power. Door won't respond.");
+    hint("No power reaches the mechanism…");
     return;
   }
 
-  // SECRET ENDING
+  // RADIO END
   if(radioTuned){
-    hint("The door opens on its own. You escaped the strange signal.");
+    hint("The door unlocks on its own… as if summoned.");
     clearButtons();
     return;
   }
 
-  // NORMAL ENDING
+  // LOCKER END
   if(keyFound){
-    const btn = document.createElement("button");
-    btn.innerText="Use Key";
-    btn.onclick=()=>{
-      hint("The lock clicks. You escaped the basement.");
+    const b = document.createElement("button");
+    b.innerText = "Use Key";
+    b.onclick = () => {
+      hint("The lock snaps open… freedom.");
       clearButtons();
     };
-    showButtons(btn);
+    showButtons(b);
     return;
   }
 
-  // VENT ENDING
+  // VENT END
   if(ventOpen){
-    hint("Door stuck. But the vent is open — escape through it.");
-    clearButtons();
+    hint("Door jammed… but the open vent awaits.");
     return;
   }
 
-  hint("The door is locked tight.");
+  hint("The door does not budge.");
 });
 M.door.addEventListener("markerLost",()=>E.door.setAttribute("visible",false));
 
