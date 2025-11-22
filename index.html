@@ -5,9 +5,12 @@
   <title>The Basement Inventory — AR Escape</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 
-<!-- A-Frame + AR.js (NFT build) -->
-<script src="https://cdn.jsdelivr.net/gh/aframevr/aframe@1c2407b26c61958baa93967b5412487cd94b290b/dist/aframe-master.min.js"></script>
-<script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+  <!-- A-Frame (latest stable) -->
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+
+  <!-- AR.js NFT build (REQUIRED for NFT markers) -->
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+
   <style>
     body { margin:0; overflow:hidden; background:black; }
     #hintBox {
@@ -17,71 +20,68 @@
       font-family:system-ui; font-size:14px; z-index:9999;
       transition: opacity 0.6s ease;
     }
+    #debugMobile {
+      position:fixed; top:10px; left:10px;
+      background:rgba(0,0,0,0.6); color:white;
+      padding:8px; font-size:14px; z-index:99999;
+    }
   </style>
 </head>
 
 <body>
-  <div id="debugMobile"
-     style="position:fixed; top:10px; left:10px; 
-            background:rgba(0,0,0,0.6); color:white; 
-            padding:8px; font-size:14px; z-index:99999;">
-    DEBUG: none
-</div>
-
-
-<!-- HINT BOX -->
+<div id="debugMobile">DEBUG: none</div>
 <div id="hintBox">The basement waits. Seek the Flashlight marker.</div>
 
 <a-scene
+  vr-mode-ui="enabled: false"
   embedded
-  renderer="colorManagement: true; physicallyCorrectLights: true"
-  xr-mode-ui="enabled: false"
-  arjs="sourceType: webcam; detectionMode: mono; debugUIEnabled: false">
-
+  arjs="trackingMethod: best; debugUIEnabled: true;"
+>
   <a-entity light="type: ambient; intensity: 0.8"></a-entity>
   <a-entity light="type: directional; intensity: 0.6" position="0 1 1"></a-entity>
 
-  <!-- --------------------------- MARKERS --------------------------- -->
-
-  <!-- Marker 1 — Flashlight -->
-  <a-nft type="nft" id="m_flashlight" url="./markers/flashlight">
-     <a-entity id="flashlight" gltf-model="./models/flashlight/scene.gltf"
-      scale="0.3 0.3 0.3" rotation="0 0 0" visible="false">
-    </a-entity>
-    </a-nft>
-
-  <!-- Marker 2 — Fuse Box -->
-  <a-nft type="nft" id="m_fusebox" url="./markers/fuse_box">
-    <a-entity id="fusebox" gltf-model="./models/fusebox/scene.gltf"
-      scale="0.4 0.4 0.4" rotation="0 180 0" visible="false">
-    </a-entity>
+  <!-- FLASHLIGHT MARKER -->
+  <a-nft
+    id="m_flashlight"
+    type="nft"
+    url="markers/flashlight">
+      <a-entity id="flashlight" gltf-model="models/flashlight/scene.gltf"
+        scale="0.3 0.3 0.3" visible="false">
+      </a-entity>
   </a-nft>
 
-  <!-- Marker 3 — Notebook -->
-  <a-nft type="nft" id="m_notebook" url="./markers/notebook">
- <a-entity id="notebook" gltf-model="./models/notebook/scene.gltf"
+  <!-- FUSE BOX -->
+  <a-nft id="m_fusebox" type="nft" url="markers/fuse_box">
+    <a-entity id="fusebox" gltf-model="models/fusebox/scene.gltf"
       scale="0.35 0.35 0.35" visible="false">
     </a-entity>
   </a-nft>
 
-  <!-- Marker 4 — Locker -->
-  <a-nft type="nft" id="m_locker" url="./markers/locker">
-    <a-entity id="locker" gltf-model="./models/rusty_locker/scene.gltf"
-      scale="0.5 0.5 0.5" rotation="0 90 0" visible="false">
+  <!-- NOTEBOOK -->
+  <a-nft id="m_notebook" type="nft" url="markers/notebook">
+    <a-entity id="notebook" gltf-model="models/notebook/scene.gltf"
+      scale="0.35 0.35 0.35" visible="false">
     </a-entity>
   </a-nft>
 
-  <!-- Marker 5 — Vent -->
-  <a-nft type="nft" id="m_vent" url="./markers/vent">
-    <a-entity id="vent" gltf-model="./models/vent/scene.gltf"
-      scale="0.5 0.5 0.5" rotation="0 0 0" visible="false">
+  <!-- LOCKER -->
+  <a-nft id="m_locker" type="nft" url="markers/locker">
+    <a-entity id="locker" gltf-model="models/rusty_locker/scene.gltf"
+      scale="0.5 0.5 0.5" visible="false">
     </a-entity>
   </a-nft>
 
-  <!-- Marker 6 — Exit Door -->
-  <a-nft type="nft" id="m_door" url="./markers/door">
-<a-entity id="door" gltf-model="./models/door/scene.gltf"
-      scale="1 1 1" rotation="0 0 0" visible="false">
+  <!-- VENT -->
+  <a-nft id="m_vent" type="nft" url="markers/vent">
+    <a-entity id="vent" gltf-model="models/vent/scene.gltf"
+      scale="0.45 0.45 0.45" visible="false">
+    </a-entity>
+  </a-nft>
+
+  <!-- DOOR -->
+  <a-nft id="m_door" type="nft" url="markers/door">
+    <a-entity id="door" gltf-model="models/door/scene.gltf"
+      scale="1 1 1" visible="false">
     </a-entity>
   </a-nft>
 
@@ -89,9 +89,9 @@
 </a-scene>
 
 <script>
-/* -------------------------------------------------
-   MYSTERIOUS ESCAPE PUZZLE — STATE MACHINE
---------------------------------------------------- */
+/* -----------------------------
+   GAME STATE
+------------------------------ */
 
 let state = "start";
 let fuseSolved = false;
@@ -99,136 +99,153 @@ let notebookRead = false;
 let lockerOpened = false;
 let ventOpened = false;
 
-const flashMarker = document.querySelector('#m-flashlight');
-const flashModel  = document.querySelector('#flashlight');
+function debug(msg){
+  document.getElementById("debugMobile").innerText = "DEBUG: " + msg;
+}
 
-flashMarker.addEventListener('markerFound', () => {
-    debug("FLASHLIGHT FOUND");
-    flashModel.setAttribute('visible', true);
-});
-
-flashMarker.addEventListener('markerLost', () => {
-    debug("FLASHLIGHT LOST");
-    flashModel.setAttribute('visible', false);
-});
-
-function hint(msg) {
+function hint(msg){
   const box = document.getElementById("hintBox");
   box.innerText = msg;
   box.style.opacity = 1;
-  setTimeout(() => { box.style.opacity = 0.6; }, 6000);
 }
 
+/* -----------------------------
+   MARKER REFERENCES
+------------------------------ */
 const M = {
   flash: document.querySelector("#m_flashlight"),
   fuse: document.querySelector("#m_fusebox"),
   note: document.querySelector("#m_notebook"),
   locker: document.querySelector("#m_locker"),
   vent: document.querySelector("#m_vent"),
-  door: document.querySelector("#m_door"),
+  door: document.querySelector("#m_door")
 };
 
-/* ------------------ Flashlight ------------------ */
-M.flash.addEventListener("markerFound", () => {
-  flashlight.setAttribute("visible", true);
+const Models = {
+  flash: document.querySelector("#flashlight"),
+  fuse: document.querySelector("#fusebox"),
+  note: document.querySelector("#notebook"),
+  locker: document.querySelector("#locker"),
+  vent: document.querySelector("#vent"),
+  door: document.querySelector("#door"),
+};
 
-  if (state === "start") {
+/* -----------------------------
+   FLASHLIGHT
+------------------------------ */
+M.flash.addEventListener("markerFound", () => {
+  debug("FLASHLIGHT FOUND");
+  Models.flash.setAttribute("visible", true);
+
+  if(state === "start"){
     state = "flashlight";
-    hint("The light stirs… Seek the Fuse Box marker.");
+    hint("You found the flashlight… Now look for the Fuse Box marker.");
   }
 });
+M.flash.addEventListener("markerLost", () => Models.flash.setAttribute("visible", false));
 
-/* ------------------ Fuse Box ------------------ */
+/* -----------------------------
+   FUSE BOX
+------------------------------ */
 M.fuse.addEventListener("markerFound", () => {
-  fusebox.setAttribute("visible", true);
+  Models.fuse.setAttribute("visible", true);
 
-  if (state !== "flashlight") {
-    hint("The room is silent. The Flashlight must awaken first.");
+  if(state !== "flashlight"){
+    hint("The power is dead… You must find the Flashlight first.");
     return;
   }
 
-  if (!fuseSolved) {
+  if(!fuseSolved){
     fuseSolved = true;
     state = "fuse";
-    hint("A faint hum returns. Now look for the Notebook marker.");
+    hint("Power hums back. Seek the Notebook marker.");
   }
 });
+M.fuse.addEventListener("markerLost", () => Models.fuse.setAttribute("visible", false));
 
-/* ------------------ Notebook ------------------ */
+/* -----------------------------
+   NOTEBOOK
+------------------------------ */
 M.note.addEventListener("markerFound", () => {
-  notebook.setAttribute("visible", true);
+  Models.note.setAttribute("visible", true);
 
-  if (!fuseSolved) {
-    hint("The pages whisper, but power must return first.");
+  if(!fuseSolved){
+    hint("The notebook is unreadable in the dark… Fix the Fuse Box first.");
     return;
   }
 
-  if (!notebookRead) {
+  if(!notebookRead){
     notebookRead = true;
     state = "note";
-    hint("A torn code appears… The Locker marker may reveal more.");
+    hint("The notebook reveals a code… Check the Locker marker.");
   }
 });
+M.note.addEventListener("markerLost", () => Models.note.setAttribute("visible", false));
 
-/* ------------------ Locker ------------------ */
+/* -----------------------------
+   LOCKER
+------------------------------ */
 M.locker.addEventListener("markerFound", () => {
-  locker.setAttribute("visible", true);
+  Models.locker.setAttribute("visible", true);
 
-  if (!notebookRead) {
-    hint("The lock resists. Something in the Notebook must guide you.");
+  if(!notebookRead){
+    hint("A lock blocks your way… The Notebook holds the clue.");
     return;
   }
 
-  if (!lockerOpened) {
+  if(!lockerOpened){
     lockerOpened = true;
     state = "locker";
-    hint("Inside lies a cold metal key. Some doors open, some deceive… Try the Exit Door marker.");
+    hint("You found a cold metal key. Try the Exit Door marker.");
   }
 });
+M.locker.addEventListener("markerLost", () => Models.locker.setAttribute("visible", false));
 
-/* ------------------ Vent ------------------ */
+/* -----------------------------
+   VENT
+------------------------------ */
 M.vent.addEventListener("markerFound", () => {
-  vent.setAttribute("visible", true);
+  Models.vent.setAttribute("visible", true);
 
-  if (!lockerOpened) {
-    hint("The grate won’t budge. Perhaps another path must be earned first.");
+  if(!lockerOpened){
+    hint("The vent won’t budge… Something else must be unlocked first.");
     return;
   }
 
-  if (!ventOpened) {
+  if(!ventOpened){
     ventOpened = true;
     state = "vent";
-    hint("A narrow escape reveals itself. If the Door denies you… the vent may not.");
+    hint("A hidden escape route opens… Perhaps the Door is not needed.");
   }
 });
+M.vent.addEventListener("markerLost", () => Models.vent.setAttribute("visible", false));
 
-/* ------------------ Exit Door ------------------ */
+/* -----------------------------
+   DOOR
+------------------------------ */
 M.door.addEventListener("markerFound", () => {
-  door.setAttribute("visible", true);
+  Models.door.setAttribute("visible", true);
 
-  if (!fuseSolved) {
-    hint("The lock lies dormant. The room must breathe first.");
+  if(!fuseSolved){
+    hint("The door refuses to power on… Restore electricity first.");
     return;
   }
 
-  if (lockerOpened) {
+  if(lockerOpened){
     state = "escaped";
-    hint("The key turns. The way out welcomes you.");
+    hint("The key turns… The door unlocks. You escape the basement.");
     return;
   }
 
-  if (ventOpened) {
+  if(ventOpened){
     state = "escaped";
-    hint("The door stays silent… but the vent is enough. You escape into the unknown.");
+    hint("The door stays sealed… but the vent is your freedom.");
     return;
   }
 
-  hint("The door refuses you. Something important remains hidden.");
+  hint("The door is locked tight… Something crucial is still missing.");
 });
-
-function debug(msg){
-    document.getElementById('debugMobile').innerText = "DEBUG: " + msg;
-}
+M.door.addEventListener("markerLost", () => Models.door.setAttribute("visible", false));
 
 </script>
 </body>
