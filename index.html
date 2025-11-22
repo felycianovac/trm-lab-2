@@ -23,6 +23,13 @@
 </head>
 
 <body>
+  <div id="debugMobile"
+     style="position:fixed; top:10px; left:10px; 
+            background:rgba(0,0,0,0.6); color:white; 
+            padding:8px; font-size:14px; z-index:99999;">
+    DEBUG: none
+</div>
+
 
 <!-- HINT BOX -->
 <div id="hintBox">The basement waits. Seek the Flashlight marker.</div>
@@ -93,6 +100,19 @@ let fuseSolved = false;
 let notebookRead = false;
 let lockerOpened = false;
 let ventOpened = false;
+
+const flashMarker = document.querySelector('#marker-flashlight');
+const flashModel  = document.querySelector('#model-flashlight');
+
+flashMarker.addEventListener('markerFound', () => {
+    debug("FLASHLIGHT FOUND");
+    flashModel.setAttribute('visible', true);
+});
+
+flashMarker.addEventListener('markerLost', () => {
+    debug("FLASHLIGHT LOST");
+    flashModel.setAttribute('visible', false);
+});
 
 function hint(msg) {
   const box = document.getElementById("hintBox");
@@ -207,6 +227,11 @@ M.door.addEventListener("markerFound", () => {
 
   hint("The door refuses you. Something important remains hidden.");
 });
+
+function debug(msg){
+    document.getElementById('debugMobile').innerText = "DEBUG: " + msg;
+}
+
 </script>
 </body>
 </html>
