@@ -343,15 +343,6 @@ const E = {
   radio: radio
 };
 
-function showCodeButton() {
-  const hintBox = document.getElementById("hintBox");
-  hintBox.innerHTML += "<br><button id='enterCodeBtn' style='margin-top:8px; padding:6px 12px;'>ENTER CODE</button>";
-
-  document.getElementById("enterCodeBtn").onclick = () => {
-    openCodeUI();
-  };
-}
-
 function openCodeUI() {
   const ui = document.getElementById("codeUI");
   const timerEl = document.getElementById("codeTimer");
@@ -377,6 +368,7 @@ function openCodeUI() {
   document.getElementById("codeSubmit").onclick = () => {
     if (input.value === lockerCode) {
       clearInterval(codeTimerInterval);
+      stopTimer();
       ui.style.display = "none";
 
       keyFound = true;
