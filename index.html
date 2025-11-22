@@ -231,16 +231,18 @@ function openCodeUI() {
   }, 1000);
 
   document.getElementById("codeSubmit").onclick = () => {
-    if (input.value === lockerCode) {
-      clearInterval(codeTimerInterval);
-      ui.style.display = "none";
-      lockerOpened = true;
-      state = "locker";
-      hint("The code clicks. The Locker is now open — scan it.");
-    } else {
-      msg.innerText = "Wrong code! Try again.";
-    }
-  };
+  if (input.value === lockerCode) {
+    clearInterval(codeTimerInterval);
+    ui.style.display = "none";
+    
+    keyFound = true;
+    hint("A cold metal key falls to the floor…");
+
+  } else {
+    msg.innerText = "The lock rattles… wrong code.";
+  }
+};
+
 }
 
 
@@ -276,46 +278,25 @@ M.fuse.addEventListener("markerFound",()=>{
 M.fuse.addEventListener("markerLost",()=>E.fuse.setAttribute("visible",false));
 
 /* -----------------------------
-   NOTEBOOK (with code unlock)
+   NOTEBOOK — reveals code
 ------------------------------ */
 M.note.addEventListener("markerFound", () => {
   E.note.setAttribute("visible", true);
 
   if (!fuseOn) {
-    hint("The notebook is unreadable in the dark… Fix the Fuse Box first.");
+    hint("Ink stains… unreadable without power.");
     return;
   }
 
   if (!notebookRead) {
-  notebookRead = true;
-  state = "note";
+    notebookRead = true;
+    state = "notebook_done";
 
-  hint("A torn page reveals two clues. Pick a path:");
+    // More subtle clue
+    hint("A scribbled line reads: 'Four shadows… 4 7 2 9'. Perhaps it opens something metal.");
 
-  clearButtons();
-
-  // Button 1: Locker branch
-  const b1 = document.createElement("button");
-  b1.innerText = "Follow the Locker Clue";
-  b1.onclick = () => {
-    notebookChoice = "locker";
-    hint("You chose the Locker path. Press ENTER CODE.");
-    clearButtons();
-    showCodeButton();
-  };
-
-  // Button 2: Radio branch
-  const b2 = document.createElement("button");
-  b2.innerText = "Follow the Radio Signal";
-  b2.onclick = () => {
-    notebookChoice = "radio";
-    hint("You chose the Radio path. Scan the Radio.");
-    clearButtons();
-  };
-
-  showButtons(b1, b2);
-}
-
+    // No buttons here. No choices.
+  }
 });
 
 M.note.addEventListener("markerLost", () => {
@@ -324,38 +305,41 @@ M.note.addEventListener("markerLost", () => {
 
 
 
-/* -----------------------------
-   LOCKER
------------------------------- */
-M.locker.addEventListener("markerFound",()=>{
-  E.locker.setAttribute("visible",true);
 
-  if(notebookChoice!=="locker"){
-    hint("The lock resists. Something else guides you.");
+/* -----------------------------
+   LOCKER — requires code
+------------------------------ */
+M.locker.addEventListener("markerFound", () => {
+  E.locker.setAttribute("visible", true);
+
+  if (state !== "notebook_done") {
+    hint("A rusty lock… no idea how to open it.");
     return;
   }
 
-  if(!keyFound){
-    hint("Enter the code before time runs out!");
+  if (!keyFound) {
+    hint("The numbers from the notebook echo in your mind… enter them.");
 
     const btn = document.createElement("button");
-    btn.innerText="Enter Code";
-    btn.onclick=()=>{
-      keyFound=true;
+    btn.innerText = "Enter Code";
+    btn.onclick = () => {
       clearButtons();
-      hint("Key found. The Door may open.");
+      openCodeUI();   // immediately open the code input
     };
 
     showButtons(btn);
 
-    // TIME LIMIT
-    startTimer(5,()=>{
+    // Optional timer (you can remove if needed)
+    startTimer(10, () => {
       clearButtons();
-      hint("You failed. The locker jams permanently.");
+      hint("The locker growls shut again.");
     });
   }
 });
-M.locker.addEventListener("markerLost",()=>E.locker.setAttribute("visible",false));
+
+M.locker.addEventListener("markerLost", () => {
+  E.locker.setAttribute("visible", false);
+});
 
 /* -----------------------------
    VENT
