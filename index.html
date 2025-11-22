@@ -277,10 +277,13 @@ M.fuse.addEventListener("markerLost",()=>E.fuse.setAttribute("visible",false));
 /* -----------------------------
    NOTEBOOK (with code unlock)
 ------------------------------ */
+/* -----------------------------
+   NOTEBOOK (with code unlock)
+------------------------------ */
 M.note.addEventListener("markerFound", () => {
-  Models.note.setAttribute("visible", true);
+  E.note.setAttribute("visible", true);
 
-  if (!fuseSolved) {
+  if (!fuseOn) {
     hint("The notebook is unreadable in the dark… Fix the Fuse Box first.");
     return;
   }
@@ -291,10 +294,14 @@ M.note.addEventListener("markerFound", () => {
 
     hint("A code is scribbled on a torn page. Press ENTER CODE on screen.");
 
-    // Show a button to start code input
     showCodeButton();
   }
 });
+
+M.note.addEventListener("markerLost", () => {
+  E.note.setAttribute("visible", false);
+});
+
 
 
 /* -----------------------------
