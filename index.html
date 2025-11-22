@@ -195,7 +195,7 @@
   <!-- FLASHLIGHT -->
   <a-nft id="m_flashlight" type="nft" url="markers/flashlight">
     <a-entity id="flashlight" gltf-model="models/flashlight/scene.gltf"
-    scale="10000 10000 10000" position="0 0 0" visible="false"></a-entity>
+    scale="1000 1000 1000" position="0 0 0" center-model visible="false"></a-entity>
   </a-nft>
 
   <!-- FUSE BOX -->
@@ -320,6 +320,28 @@ function win(message="You escaped.") {
   }, 1200);
 }
 
+AFRAME.registerComponent('center-model', {
+  init: function () {
+    this.el.addEventListener('model-loaded', () => {
+      const obj = this.el.getObject3D('mesh');
+      if (!obj) return;
+
+      // Compute bounding box
+      const box = new THREE.Box3().setFromObject(obj);
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
+
+      // Recenter the model
+      obj.position.sub(center);
+
+      // OPTIONAL: flip axes depending on rotation issues
+      // obj.rotation.set(-Math.PI/2, 0, 0);  // if needed
+
+      console.log("Model centered:", center, "size:", size);
+    });
+  }
+});
+
 
 
 /* -----------------------------
@@ -395,7 +417,7 @@ M.flash.addEventListener("markerFound",()=>{
     hint("Your flashlight flickers on. You hear a faint electrical hum nearby.");
   }
 });
-// M.flash.addEventListener("markerLost",()=>E.flash.setAttribute("visible",false));
+M.flash.addEventListener("markerLost",()=>E.flash.setAttribute("visible",false));
 
 /* -----------------------------
    FUSE BOX
