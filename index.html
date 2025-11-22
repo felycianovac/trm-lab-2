@@ -457,7 +457,6 @@ M.flash.addEventListener("markerLost",()=>E.flash.setAttribute("visible",false))
    FUSE BOX
 ------------------------------ */
 M.fuse.addEventListener("markerFound",()=>{
-  E.fuse.setAttribute("visible",true);
 
   if(state!=="flashlight"){
     hint("You grope in darkness… the fusebox feels cold.");
@@ -465,6 +464,7 @@ M.fuse.addEventListener("markerFound",()=>{
   }
 
   if(!fuseOn){
+    E.fuse.setAttribute("visible",true);
     fuseOn=true;
     hint("A soft hum fills the basement… pages may now be readable.");
     state="fuse";
@@ -476,7 +476,6 @@ M.fuse.addEventListener("markerLost",()=>E.fuse.setAttribute("visible",false));
    NOTEBOOK — reveals code
 ------------------------------ */
 M.note.addEventListener("markerFound", () => {
-  E.note.setAttribute("visible", true);
 
   if (!fuseOn) {
     hint("The ink runs in the dark… you see nothing.");
@@ -484,6 +483,7 @@ M.note.addEventListener("markerFound", () => {
   }
 
   if (!notebookRead) {
+    E.note.setAttribute("visible", true);
     notebookRead = true;
     state = "notebook_done";
 
@@ -522,8 +522,6 @@ M.note.addEventListener("markerLost",()=>E.note.setAttribute("visible",false));
    LOCKER — requires code
 ------------------------------ */
 M.locker.addEventListener("markerFound", () => {
-  E.locker.setAttribute("visible", true);
-
   if(notebookChoice === null){
     hint("A rusted door… no ideas come to mind.");
     return;
@@ -534,6 +532,8 @@ M.locker.addEventListener("markerFound", () => {
   }
 
   if(!keyFound){
+    E.locker.setAttribute("visible", true);
+
     hint("The digits from the notebook pulse in your thoughts…");
 
     const b = document.createElement("button");
@@ -556,8 +556,6 @@ let freq = 90;
 const radioSlider = document.getElementById("radioSlider");
 
 M.radio.addEventListener("markerFound", () => {
-  E.radio.setAttribute("visible", true);
-
   // wrong branch = instant dead end
   if (notebookChoice === "locker") {
     gameOver("You followed the wrong path… the signal swallows you.");
@@ -568,6 +566,9 @@ M.radio.addEventListener("markerFound", () => {
     hint("Only static responds.");
     return;
   }
+
+  E.radio.setAttribute("visible", true);
+
 
   // Enable slider tuning
   radioSlider.style.display = "block";
@@ -596,9 +597,9 @@ M.radio.addEventListener("markerLost", () => {
    VENT (backup escape)
 ------------------------------ */
 M.vent.addEventListener("markerFound",()=>{
-  E.vent.setAttribute("visible",true);
 
   if(keyFound || radioTuned){
+    E.vent.setAttribute("visible",true);
     if(!ventOpen){
       ventOpen = true;
       hint("The screws fall out… the vent is open.");
@@ -613,8 +614,6 @@ M.vent.addEventListener("markerLost",()=>E.vent.setAttribute("visible",false));
    DOOR — Multiple Endings
 ------------------------------ */
 M.door.addEventListener("markerFound",()=>{
-  E.door.setAttribute("visible",true);
-
   if(!fuseOn){
     hint("No power reaches the mechanism…");
     return;
@@ -629,6 +628,7 @@ M.door.addEventListener("markerFound",()=>{
 
   // LOCKER END
   if(keyFound){
+    E.door.setAttribute("visible",true);
     const b = document.createElement("button");
     b.innerText = "Use Key";
     b.onclick = () => {
